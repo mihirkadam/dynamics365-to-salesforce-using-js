@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Salesforce</title>
+    <script src="../../ClientGlobalContext.js.aspx" type="text/javascript"></script>
+    <script>
+
+        function loginSalesforce() {
+            "use strict"
+            var callback_url = Xrm.Page.context.getClientUrl() + "//WebResources/apsf_/salesforce/callback.html?data=";
+            var client_id = "3MVG9YDQS5WtC11rWA8dqKFbxhXfZjHf9M3KXY9XYPKevYDu7pcgZVxhHXMfhIr70X58jvstzh_jqT3pm.Qi2";
+            var authorize_url = "https://login.salesforce.com/services/oauth2/authorize?response_type=token";
+            var login_full_url = authorize_url + "&client_id=" + client_id + "&redirect_uri=" + callback_url + "&state=mystate"
+            var login_window = window.open(login_full_url, 'Salesforce Login', 'resizable,height=460,width=370')
+
+            window.addEventListener('message', function (e) {
+                login_window.close();
+                getAccounts(e.data)
+            }, false);
+        }
+
+        function getAccounts(credentials) {
+            "use strict";
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    createTable(JSON.parse(this.responseText))
+                }
+            };
+            xhttp.open("GET", credentials.instance_url + "//services/data/v43.0/query?q=SELECT Name FROM Account", true);
+            xhttp.setRequestHeader("Content-Type", "application/json")
+            xhttp.setRequestHeader("Authorization", "OAuth " + credentials.access_token)
+            xhttp.send();
+        }
+        function createTable(data) {
+            var table = document.getElementById("myTable").getElementsByTagName('tbody')[0];
+            for (var cnt = 0; cnt < data.records.length; cnt++) {
+                var row = table.insertRow(0);
+                var cell1 = row.insertCell(0);
+                cell1.innerHTML = data.records[cnt].Name;
+            }
+            document.getElementsByClassName("content-body")[0].style.display = "block";
+        }
+    </script>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td, th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        .content-body{
+            display:none
+        }
+    </style>
+</head>
+<body>
+    <section>
+        <div class="command-bar">
+            <button onclick="loginSalesforce()">Salesforce Login</button>
+        </div>
+    </section>
+    <section>
+        <div class="content-body">
+            <h2>List of Accounts</h2>
+            <table id="myTable">
+
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+</body>
+</html>

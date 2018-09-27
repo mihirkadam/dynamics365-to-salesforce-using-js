@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+    <script>
+        function onLoad() {
+           // getDataParam()
+            debugger;
+        var query_string = QueryStringToJSON();
+            window.opener.postMessage(query_string, "*");
+            window.close();
+        }
+
+        function QueryStringToJSON() {
+
+            var pairs = location.href.substr(location.href.indexOf("data=") + 5, location.href.length).slice(1).split('&');
+
+
+            var result = {};
+            pairs.forEach(function (pair) {
+                pair = pair.split('=');
+                result[pair[0]] = decodeURIComponent(pair[1] || '');
+            });
+
+            return JSON.parse(JSON.stringify(result));
+        }
+
+
+
+    </script>
+
+</head>
+<body onload="onLoad()">
+
+</body>
+</html>
